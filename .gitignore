@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*$py.class
+_rawfix_workspace/
+*.pdf
+*.html
+.DS_Store
+Thumbs.db

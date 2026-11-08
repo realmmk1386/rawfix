@@ -1,0 +1,34 @@
+{
+  "title": "Manga Title — Chapter 01",
+  "chapter_name": "Chapter 01",
+  "notes_header": "<strong>Typesetting Notes:</strong> All bubbles verified. Numbering offset +0.",
+  "pages": [
+    {
+      "img": "01",
+      "pdf_page": 1,
+      "items": [
+        {
+          "type": "Bubble",
+          "text": "What's that sound coming from the woods...?",
+          "orig": "Whats that sound coming from the woods?"
+        },
+        {
+          "type": "SFX",
+          "text": "*RUSTLE* *RUSTLE*",
+          "note": "Korean: 바스락 바스락"
+        }
+      ]
+    },
+    {
+      "img": "02",
+      "pdf_page": 2,
+      "items": [
+        {
+          "type": "Box",
+          "text": "Chapter 1: The Beginning",
+          "orig": "chapter 1 the beginning"
+        }
+      ]
+    }
+  ]
+}
