@@ -8,6 +8,7 @@ and an accompanying plain text (.txt) file using headless Chromium / Edge.
 import os
 import sys
 import json
+import re
 import subprocess
 import shutil
 import argparse
