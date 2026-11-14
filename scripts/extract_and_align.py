@@ -13,8 +13,13 @@ import json
 import argparse
 from PIL import Image
 
-def natural_sort_key(s):
-    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
+def get_page_number(filepath):
+    base = os.path.basename(filepath)
+    # Match trailing number before file extension (e.g. IMAG01_12.JPEG -> 12)
+    m = re.search(r'(\d+)\.[^.]+$', base)
+    if m:
+        return int(m.group(1))
+    return 999999
 
 def extract_pdf_pages(pdf_path):
     import pypdf
@@ -29,34 +34,23 @@ def extract_pdf_pages(pdf_path):
     return pages
 
 def find_chapter_images(img_dir):
-    exts = ('*.jpg', '*.jpeg', '*.png', '*.webp')
+    exts = ('*.jpg', '*.jpeg', '*.png', '*.webp', '*.JPG', '*.JPEG', '*.PNG', '*.WEBP')
     files = []
     for ext in exts:
         files.extend(glob.glob(os.path.join(img_dir, ext)))
-    # Sort naturally
-    files = sorted(files, key=natural_sort_key)
+    # Deduplicate in case case-insensitive filesystems match twice
+    files = list(set(files))
+    # Sort by exact panel number
+    files = sorted(files, key=get_page_number)
     return files
 
 def generate_contact_sheets(image_files, output_dir, max_per_sheet=6):
     os.makedirs(output_dir, exist_ok=True)
     sheets = []
     
-    # Filter chapter panels (exclude general ending pages or logos if not numbered)
-    numbered_files = []
-    for f in image_files:
-        base = os.path.basename(f)
-        m = re.search(r'(\d+)', base)
-        if m:
-            numbered_files.append((int(m.group(1)), f))
-        else:
-            numbered_files.append((9999, f))
-            
-    numbered_files.sort(key=lambda x: x[0])
-    just_files = [x[1] for x in numbered_files]
-    
     # Process in batches of 6 (3 cols x 2 rows)
-    for sheet_idx, i in enumerate(range(0, len(just_files), max_per_sheet), start=1):
-        batch = just_files[i:i + max_per_sheet]
+    for sheet_idx, i in enumerate(range(0, len(image_files), max_per_sheet), start=1):
+        batch = image_files[i:i + max_per_sheet]
         if not batch:
             continue
             
@@ -71,11 +65,10 @@ def generate_contact_sheets(image_files, output_dir, max_per_sheet=6):
         for idx, im in enumerate(imgs):
             c = idx % cols
             r = idx // cols
-            # Resize while preserving aspect ratio if needed, or fit
             im_resized = im.resize((cell_w, cell_h), Image.Resampling.LANCZOS)
             sheet.paste(im_resized, (c * cell_w, r * cell_h))
             
-        sheet_path = os.path.join(output_dir, f'contact_sheet_{sheet_idx}.jpg')
+        sheet_path = os.path.join(output_dir, f'contact_sheet_{sheet_idx:02d}.jpg')
         sheet.save(sheet_path, quality=80)
         sheets.append({
             "sheet_index": sheet_idx,
